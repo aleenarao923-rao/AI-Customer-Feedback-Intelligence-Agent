@@ -1,0 +1,356 @@
+{
+  "name": "AI Customer Feedback Intelligence Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c7249c88-9b27-4a4c-9032-da6a0f65461d",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -112,
+        -32
+      ],
+      "webhookId": "35fa8c7e-715c-4f31-abcc-a68773380ae4"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "6772d61c-7306-47dd-945c-cf107396b443",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        176
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI Customer Feedback Intelligence Agent.\n\nYour job is to analyze customer feedback and extract useful business insights.\n\nFor every customer feedback message, identify:\n\n1. Sentiment\n2. Main topic\n3. Complaint\n4. Customer intent\n5. Urgency\n6. Suggested action\n7. Short summary\n\nSENTIMENT:\nSentiment must be exactly one of:\n- Positive\n- Neutral\n- Negative\n\nURGENCY:\nUrgency must be exactly one of:\n- Low\n- Medium\n- High\n\nCUSTOMER INTENT:\nCustomer intent should be one of:\n- Praise\n- Complaint\n- Question\n- Suggestion\n- Request\n- Other\n\nRULES:\n\n1. Analyze only the information provided by the customer.\n2. Never invent facts.\n3. If a complaint is not present, write \"None\".\n4. If the customer intent is unclear, use \"Other\".\n5. Keep the analysis concise and business-focused.\n6. Identify the main issue even when the customer mentions multiple things.\n7. Provide a practical suggested action for the business.\n8. Do not make assumptions about information that is not present.\n9. If the feedback contains both positive and negative points, consider the overall customer sentiment and explain the main reason.\n10. Always produce all requested fields.\n\nYour response should be clear, structured, and easy for a business manager to understand."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        -32
+      ],
+      "id": "ab6dead1-1c65-4f28-9a8e-073fc1107bec",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"sentiment\": \"Negative\",\n  \"topic\": \"Delivery\",\n  \"complaint\": \"Late delivery and unanswered calls\",\n  \"intent\": \"Complaint\",\n  \"urgency\": \"High\",\n  \"suggested_action\": \"Apologize and offer compensation; investigate delivery delay\",\n  \"summary\": \"Food and staff were praised, but delivery was late and calls unanswered.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        144
+      ],
+      "id": "804f298c-7811-43a8-b6b0-6c13a7c93249",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "customer_feedback",
+          "mode": "list",
+          "cachedResultName": "customer_feedback"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "feedback_text": "={{ $('When chat message received').item.json.chatInput }}",
+            "sentiment": "={{ $json.output.sentiment }}",
+            "topic": "={{ $json.output.topic }}",
+            "complaint": "={{ $json.output.complaint }}",
+            "intent": "={{ $json.output.intent }}",
+            "urgency": "={{ $json.output.urgency }}",
+            "suggested_action": "={{ $json.output.suggested_action }}",
+            "summary": "={{ $json.output.summary }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "feedback_text",
+              "displayName": "feedback_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "topic",
+              "displayName": "topic",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "complaint",
+              "displayName": "complaint",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "suggested_action",
+              "displayName": "suggested_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.7,
+      "position": [
+        480,
+        -32
+      ],
+      "id": "498ede1d-96b6-461e-82ba-e258e44b0778",
+      "name": "Insert rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "bYUyKCXk261scBcp",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d6d4275f-c766-42f1-b53f-1af183d79bbf",
+              "leftValue": "={{ $json.urgency }}",
+              "rightValue": "High",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        -32
+      ],
+      "id": "5f4676f4-401b-486a-b27e-1855363b1309",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "javedalina346@gmail.com",
+        "subject": "🚨 High Urgency Customer Complaint - Action Required",
+        "emailType": "text",
+        "message": "=⚠️ High Urgency Customer Feedback Alert\n\nFeedback: {{ $json.feedback_text }}\n\nSentiment: {{ $json.sentiment }}\nTopic: {{ $json.topic }}\nComplaint: {{ $json.complaint }}\nIntent: {{ $json.intent }}\nUrgency: {{ $json.urgency }}\n\nSuggested Action: {{ $json.suggested_action }}\n\nSummary: {{ $json.summary }}\n\nPlease review and respond promptly.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        928,
+        -71.21763392857146
+      ],
+      "id": "f3977a07-4cb4-477b-95a6-808dfdb6854b",
+      "name": "Send a message",
+      "webhookId": "aef2af14-cc4a-487a-9b9c-06384d43c14b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gTPXsmf6crQMKQ9g",
+          "name": "Gmail account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "be36a66b-7779-4df0-9027-fcff490bc0b1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b30f3aaaf1d27f3fe01df58154e23a02b910e6ef9e26ceb7e554b7a08be606db"
+  },
+  "nodeGroups": [],
+  "id": "FeOvyM7osQvkLJ1k",
+  "tags": []
+}
